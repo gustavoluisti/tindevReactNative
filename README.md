@@ -1,5 +1,5 @@
-#git clone https://github.com/gustavoluisti/tindevReactNative.git
-#yarn add
+<p>git clone https://github.com/gustavoluisti/tindevReactNative.git</p>
+<p>yarn add</p>
 
-#react-native run-ios
-#react-native run-android
+<p>react-native run-ios</p>
+<p>react-native run-android</p>
