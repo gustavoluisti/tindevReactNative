@@ -1,26 +1,52 @@
-import React from 'react';
-import { KeyboardAvoidingView, Platform , Text, StyleSheet, Image, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-community/async-storage';
+import { KeyboardAvoidingView, Platform, Text, StyleSheet, Image, TouchableOpacity, TextInput } from 'react-native';
+import api from '../services/api';
 
 import logo from '../assets/logo.png'
 
-export default function Login() {
+export default function Login({ navigation }) {
+    const [user, setUser] = useState('');
+
+    useEffect(()=> {
+        AsyncStorage.getItem('user').then(user => {
+            if(user) {
+                navigation.navigate('Main', { user })
+            }
+        })
+    }, [])
+
+    async function handleLogin() {
+        const response = await api.post('/devs', {username: user});
+
+        const { _id } = response.data;
+
+        await AsyncStorage.setItem('user', _id);
+        console.log(_id)
+        navigation.navigate('Main', { _id})
+    }
+
     return (
         <KeyboardAvoidingView
-        behavior="padding"
-        enabled={Platform.OS === 'ios'}
-        style={styles.container}>
+            behavior="padding"
+            enabled={Platform.OS === 'ios'}
+            style={styles.container}>
+
             <Image source={logo} />
             <TextInput
-             autoCapitalize="none"
-             autoCorrect={false}
-             style={styles.input} 
-             placeholder="Digite seu usuário no github"
-             placeholderTextColor="#999"
-             />
+                value={user}
+                onChangeText={setUser}
+                autoCapitalize="none"
+                autoCorrect={false}
+                style={styles.input}
+                placeholder="Digite seu usuário no Github"
+                placeholderTextColor="#999"
+            />
             <TouchableOpacity
+                onPress={handleLogin}
                 style={styles.button}
                 title="teste">
-                    <Text style={styles.buttonText}>Enviar</Text>
+                <Text style={styles.buttonText}>Enviar</Text>
             </TouchableOpacity>
         </KeyboardAvoidingView>
     )
@@ -34,7 +60,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5',
         padding: 30
     },
-    input:{
+    input: {
         height: 46,
         alignSelf: 'stretch',
         backgroundColor: '#FFF',
@@ -44,7 +70,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
         paddingHorizontal: 15,
     },
-    button:{
+    button: {
         height: 46,
         alignSelf: 'stretch',
         backgroundColor: '#DF4723',
@@ -53,7 +79,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    buttonText:{
+    buttonText: {
         color: '#FFF',
         fontWeight: 'bold',
         fontSize: 16,

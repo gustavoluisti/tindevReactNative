@@ -2,11 +2,11 @@
 import React from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 
-import Login from './pages/Login'
+import Routes from './routes';
 
 function App() {
   return(
-      <Login />
+      <Routes />
     
   )
 }
