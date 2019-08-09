@@ -59,30 +59,32 @@ export default function Main({ navigation }) {
 
             <View style={styles.cardsContainer}>
                 {users.length === 0
-                ? <Text style={styles.empty}>Acabou :(</Text> 
-                : (
-                    users.map((user, index) => (
-                        <View key={user._id} style={[styles.card, { zIndex: users.length - index }]}>
-                            <Image
-                                style={styles.avatar}
-                                source={{ uri: user.avatar }} />
-                            <View style={styles.footer}>
-                                <Text style={styles.name}>{user.name}</Text>
-                                <Text style={styles.bio} numberOfLines={3}>{user.bio}</Text>
+                    ? <Text style={styles.empty}>Acabou :(</Text>
+                    : (
+                        users.map((user, index) => (
+                            <View key={user._id} style={[styles.card, { zIndex: users.length - index }]}>
+                                <Image
+                                    style={styles.avatar}
+                                    source={{ uri: user.avatar }} />
+                                <View style={styles.footer}>
+                                    <Text style={styles.name}>{user.name}</Text>
+                                    <Text style={styles.bio} numberOfLines={3}>{user.bio}</Text>
+                                </View>
                             </View>
-                        </View>
-                    ))
-                )}
+                        ))
+                    )}
             </View>
 
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={handleDislike} style={styles.button}>
-                    <Image source={dislike} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleLike} style={styles.button}>
-                    <Image source={like} />
-                </TouchableOpacity>
-            </View>
+            {users.length > 0 && (
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity onPress={handleDislike} style={styles.button}>
+                        <Image source={dislike} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleLike} style={styles.button}>
+                        <Image source={like} />
+                    </TouchableOpacity>
+                </View>
+            )}
         </SafeAreaView>
     )
 }
@@ -157,7 +159,7 @@ const styles = StyleSheet.create({
             height: 2,
         }
     },
-    empty:{
+    empty: {
         alignSelf: 'center',
         color: '#999',
         fontSize: 24,
