@@ -1,64 +1,85 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView, TouchableOpacity, View, Text, Image, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
+
+import api from '../services/api';
 
 import logo from '../assets/logo.png';
 import like from '../assets/like.png';
 import dislike from '../assets/dislike.png';
 
-export default function Main(){
-    return(
+export default function Main({ navigation }) {
+    const id = navigation.getParam('user')
+    const [users, setUsers] = useState([]);
+
+    console.log(id)
+    useEffect(() => {
+        async function loadUsers() {
+            const response = await api.get('/devs', {
+                headers: {
+                    user: id,
+                }
+            })
+            setUsers(response.data);
+        }
+
+        loadUsers();
+
+    }, [id]);
+
+    async function handleLike() {
+        const [user, ...rest] = users;
+
+        await api.post(`/devs/${user._id}/likes`, null, {
+            headers: { user: id },
+        })
+        setUsers(rest);
+    }
+
+    async function handleDislike() {
+        const [user, ...rest] = users;
+
+        await api.post(`/devs/${user._id}/dislikes`, null, {
+            headers: { user: id },
+        })
+        setUsers(rest);
+    }
+
+    async function handleLogout() {
+        await AsyncStorage.clear();
+
+        navigation.navigate('Login');
+    }
+
+    return (
         <SafeAreaView style={styles.container}>
-            <Image source={logo} style={styles.logo} />
+            <TouchableOpacity onPress={handleLogout}>
+                <Image source={logo} style={styles.logo} />
+            </TouchableOpacity>
 
             <View style={styles.cardsContainer}>
-
-                <View style={[styles.card, {zIndex: 3} ]}>
-                    <Image
-                        style={styles.avatar}
-                        source={{ uri: 'https://avatars3.githubusercontent.com/u/5570231?v=4'}} />
-                    <View style={styles.footer}>
-                        <Text style={styles.name}>Luis Gustavo</Text>
-                        <Text style={styles.bio} numberOfLines={3}>Sou foda na cama </Text>
-                    </View>
-                </View>
-
-                <View style={[styles.card, {zIndex: 3} ]}>
-                    <Image
-                        style={styles.avatar}
-                        source={{ uri: 'https://avatars3.githubusercontent.com/u/5570231?v=4'}} />
-                    <View style={styles.footer}>
-                        <Text style={styles.name}>Luis Gustavo</Text>
-                        <Text style={styles.bio} numberOfLines={3}>Sou foda na cama </Text>
-                    </View>
-                </View>
-
-                <View style={[styles.card, {zIndex: 2} ]}>
-                    <Image
-                        style={styles.avatar}
-                        source={{ uri: 'https://avatars3.githubusercontent.com/u/5570231?v=4'}} />
-                    <View style={styles.footer}>
-                        <Text style={styles.name}>Luis Gustavo</Text>
-                        <Text style={styles.bio} numberOfLines={3}>Sou foda na cama </Text>
-                    </View>
-                </View>
-
-                <View style={[styles.card, {zIndex: 1} ]}>
-                    <Image
-                        style={styles.avatar}
-                        source={{ uri: 'https://avatars3.githubusercontent.com/u/5570231?v=4'}} />
-                    <View style={styles.footer}>
-                        <Text style={styles.name}>Luis Gustavo</Text>
-                        <Text style={styles.bio} numberOfLines={3}>Sou  uihiuhsiuhf iuhiu iunbiubibib iubiubibiubiu iubiubiiuofoda na cama </Text>
-                    </View>
-                </View>
-
+                {users.length === 0
+                ? <Text style={styles.empty}>Acabou :(</Text> 
+                : (
+                    users.map((user, index) => (
+                        <View key={user._id} style={[styles.card, { zIndex: users.length - index }]}>
+                            <Image
+                                style={styles.avatar}
+                                source={{ uri: user.avatar }} />
+                            <View style={styles.footer}>
+                                <Text style={styles.name}>{user.name}</Text>
+                                <Text style={styles.bio} numberOfLines={3}>{user.bio}</Text>
+                            </View>
+                        </View>
+                    ))
+                )}
             </View>
 
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity onPress={handleDislike} style={styles.button}>
                     <Image source={dislike} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity onPress={handleLike} style={styles.button}>
                     <Image source={like} />
                 </TouchableOpacity>
             </View>
@@ -67,23 +88,23 @@ export default function Main(){
 }
 
 const styles = StyleSheet.create({
-    container:{
-        flex:1,
+    container: {
+        flex: 1,
         backgroundColor: '#f5f5f5',
         alignItems: 'center',
         justifyContent: 'space-between',
     },
-    cardsContainer:{
+    cardsContainer: {
         flex: 1,
         alignSelf: 'stretch',
         justifyContent: 'center',
         maxHeight: 500,
-        
+
     },
-    logo:{
+    logo: {
         marginTop: 30
     },
-    card:{
+    card: {
         borderWidth: 1,
         borderColor: '#DDD',
         borderRadius: 8,
@@ -91,38 +112,38 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         position: 'absolute',
         top: 0,
-        left:0,
-        right:0,
+        left: 0,
+        right: 0,
         bottom: 0,
     },
-    avatar:{
-        flex:1,
-        height:300,
+    avatar: {
+        flex: 1,
+        height: 300,
     },
-    footer:{
+    footer: {
         backgroundColor: '#FFF',
         paddingHorizontal: 20,
         paddingVertical: 15,
     },
-    name:{
+    name: {
         fontSize: 16,
         fontWeight: 'bold',
         color: '#333',
     },
-    bio:{
+    bio: {
         fontSize: 14,
         color: '#999',
         marginTop: 5,
         lineHeight: 18,
     },
-    buttonContainer:{
+    buttonContainer: {
         flexDirection: 'row',
         marginBottom: 30,
     },
-    button:{
-        width:50,
+    button: {
+        width: 50,
         height: 50,
-        borderRadius:25,
+        borderRadius: 25,
         backgroundColor: '#FFF',
         justifyContent: 'center',
         alignItems: 'center',
@@ -135,5 +156,11 @@ const styles = StyleSheet.create({
             width: 0,
             height: 2,
         }
+    },
+    empty:{
+        alignSelf: 'center',
+        color: '#999',
+        fontSize: 24,
+        fontWeight: 'bold',
     }
 })
